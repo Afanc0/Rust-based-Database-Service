@@ -10,6 +10,8 @@ use tokio::sync::OnceCell;
 use once_cell::sync::Lazy;
 use futures::stream::StreamExt;
 
+use mongodb::results::DatabaseSpecification;
+
 use dotenv::dotenv;
 use std::env;
 
@@ -88,11 +90,27 @@ pub async fn update_one(coll: &str, filter: Document, update: Document, db: &str
     Ok(result.modified_count)
 }
 
+pub struct DatabaseInfo {
+    pub name: String,
+    pub size_on_disk: u64
+}
+
 #[allow(dead_code)]
-pub async fn list_databases() -> Result<Vec<String>> {
+pub async fn list_databases() -> Result<Vec<DatabaseInfo>> {
     let client = CLIENT.get().expect("MongoDB client not initialized");
-    let db_names = client.list_database_names(None, None).await?;
-    Ok(db_names)
+    let dbs: Vec<DatabaseSpecification> = client
+        .list_databases(None, None)
+        .await?;
+    let databases = dbs
+        .into_iter()
+        .filter_map(|spec| {
+            Some(DatabaseInfo {
+                name: spec.name,                          
+                size_on_disk: spec.size_on_disk,          
+            })
+        })
+        .collect();
+    Ok(databases)
 }
 
 #[allow(dead_code)]

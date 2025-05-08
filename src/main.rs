@@ -13,10 +13,12 @@ async fn main() -> Result<()> {
     // let docs = db_client::find_many("cats", doc! {}, "animals").await?;
     // println!("Found docs: {:?}", docs);
 
-    // let result = db_client::list_databases().await?;
-    // for db in result {
-    //     println!("{}", db);
-    // }
+    db_client::init_client().await?; 
+
+    let result = db_client::list_databases().await?;
+    for db in result {
+        println!("Database: {}, Size on disk: {}", db.name, db.size_on_disk);
+    }
 
     // let result = db_client::fetch_collections(DB).await?;
     // for coll in result {
@@ -35,9 +37,9 @@ async fn main() -> Result<()> {
     // println!("{:?}", result);
 
 
-    db_client::init_client().await?; 
-    let docs = db_client::find_many("cats", doc! {}, "animals").await?;
-    println!("Found docs: {:?}", docs);
+    // db_client::init_client().await?; 
+    // let docs = db_client::find_many("cats", doc! {}, "animals").await?;
+    // println!("Found docs: {:?}", docs);
     
 
     Ok(())
